@@ -20,7 +20,7 @@
 =====================================================================
 =====================================================================
 
-What is Kickstart?
+ What is Kickstart?
 
   Kickstart.nvim is *not* a distribution.
 
@@ -91,7 +91,7 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -102,14 +102,25 @@ vim.g.have_nerd_font = false
 vim.opt.number = true
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
--- vim.opt.relativenumber = true
+vim.opt.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
 
 -- Don't show the mode, since it's already in the status line
 vim.opt.showmode = false
+-- Set cursor to a vertical bar when entering Insert Mode
+-- Configure cursor styles for different modes
+-- -- Minimal example
+vim.opt.guicursor = 'n-v-c:block,i-ci:ver25'
+-- Set cursor to a blinking block when exiting Insert Mode (Normal Mode)
 
+local o = vim.o
+
+o.expandtab = true
+o.smartindent = true
+o.tabstop = 2
+o.shiftwidth = 2
 -- Sync clipboard between OS and Neovim.
 --  Schedule the setting after `UiEnter` because it can increase startup-time.
 --  Remove this option if you want your OS clipboard to remain independent.
@@ -150,7 +161,6 @@ vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 
 -- Preview substitutions live, as you type!
 vim.opt.inccommand = 'split'
-
 -- Show which line your cursor is on
 vim.opt.cursorline = true
 
@@ -165,6 +175,8 @@ vim.opt.scrolloff = 10
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
 -- Diagnostic keymaps
+vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous [D]iagnostic message' })
+vim.keymap.set('n', 'd]', vim.diagnostic.goto_prev, { desc = 'Go to next [D]iagnostic message' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
@@ -190,6 +202,9 @@ vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right win
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
+-- "greatest remap ever"ever
+vim.keymap.set('x', '<leader>p', '_dP')
+vim.keymap.set('n', 'Q', '<nop>')
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
@@ -336,7 +351,7 @@ require('lazy').setup({
       -- Two important keymaps to use while in Telescope are:
       --  - Insert mode: <c-/>
       --  - Normal mode: ?
-      --
+      --NOTE Hello there
       -- This opens a window that shows you all of the keymaps for the current
       -- Telescope picker. This is really useful to discover what Telescope can
       -- do as well as how to actually do it!
@@ -347,12 +362,12 @@ require('lazy').setup({
         -- You can put your default mappings / updates / etc. in here
         --  All the info you're looking for is in `:help telescope.setup()`
         --
-        -- defaults = {
-        --   mappings = {
-        --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
-        --   },
-        -- },
-        -- pickers = {}
+        defaults = {
+          initial_mode = 'insert',
+          mappings = {
+            i = { ['<c-enter>'] = 'to_fuzzy_refine' },
+          },
+        },
         extensions = {
           ['ui-select'] = {
             require('telescope.themes').get_dropdown(),
@@ -366,6 +381,44 @@ require('lazy').setup({
 
       -- See `:help telescope.builtin`
       local builtin = require 'telescope.builtin'
+      -- For deleting buffers, not working really
+      --local action_state = require 'telescope.actions.state'
+      --local actions = require 'telescope.actions'
+      --local buffer_searcher
+      --buffer_searcher = function()
+      --  builtin.buffers {
+      --    sort_mru = true,
+      --    ignore_current_buffer = true,
+      --    show_all_buffers = false,
+      --    attach_mappings = function(prompt_bufnr, map)
+      --      local refresh_buffer_searcher = function()
+      --        actions.close(prompt_bufnr)
+      --        vim.schedule(buffer_searcher)
+      --      end
+
+      --      local delete_buf = function()
+      --        local selection = action_state.get_selected_entry()
+      --        vim.api.nvim_buf_delete(selection.bufnr, { force = true })
+      --        refresh_buffer_searcher()
+      --      end
+
+      --      local delete_multiple_buf = function()
+      --        local picker = action_state.get_current_picker(prompt_bufnr)
+      --        local selection = picker:get_multi_selection()
+      --        for _, entry in ipairs(selection) do
+      --          vim.api.nvim_buf_delete(entry.bufnr, { force = true })
+      --        end
+      --        refresh_buffer_searcher()
+      --      end
+
+      --      map('n', 'dd', delete_buf)
+      --      map('n', '<C-d>', delete_multiple_buf)
+      --      map('i', '<C-d>', delete_multiple_buf)
+      --      return true
+      --    end,
+      --  }
+      --end
+      --vim.keymap.set('n', '<leader>fb', buffer_searcher, {})
       vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
       vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
       vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
@@ -461,6 +514,12 @@ require('lazy').setup({
       --  This function gets run when an LSP attaches to a particular buffer.
       --    That is to say, every time a new file is opened that is associated with
       --    an lsp (for example, opening `main.rs` is associated with `rust_analyzer`) this
+      vim.lsp.handlers['textDocument/publishDiagnostics'] = vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics, {
+        virtual_text = false,
+        signs = true,
+        update_in_insert = false,
+        underline = true,
+      })
       --    function will be executed to configure the current buffer
       vim.api.nvim_create_autocmd('LspAttach', {
         group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
@@ -489,7 +548,7 @@ require('lazy').setup({
           -- Jump to the type of the word under your cursor.
           --  Useful when you're not sure what type a variable is and you want to see
           --  the definition of its *type*, not where it was *defined*.
-          map('<leader>D', require('telescope.builtin').lsp_type_definitions, 'Type [D]efinition')
+          map('<neader>D', require('telescope.builtin').lsp_type_definitions, 'Type [D]efinition')
 
           -- Fuzzy find all the symbols in your current document.
           --  Symbols are things like variables, functions, types, etc.
@@ -571,8 +630,8 @@ require('lazy').setup({
       local servers = {
         -- clangd = {},
         -- gopls = {},
-        -- pyright = {},
         -- rust_analyzer = {},
+        pyright = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
         -- Some languages (like typescript) have entire language plugins that can be useful:
@@ -581,7 +640,8 @@ require('lazy').setup({
         -- But for many setups, the LSP (`tsserver`) will work just fine
         -- tsserver = {},
         --
-
+        bashls = {},
+        csharp_ls = {},
         lua_ls = {
           -- cmd = {...},
           -- filetypes = { ...},
@@ -627,6 +687,23 @@ require('lazy').setup({
         },
       }
     end,
+  },
+  {
+    'ray-x/guihua.lua',
+  },
+  {
+    'ray-x/go.nvim',
+    dependencies = { -- optional packages
+      'ray-x/guihua.lua',
+      'neovim/nvim-lspconfig',
+      'nvim-treesitter/nvim-treesitter',
+    },
+    config = function()
+      require('go').setup()
+    end,
+    event = { 'CmdlineEnter' },
+    ft = { 'go', 'gomod' },
+    build = ':lua require("go.install").update_all_sync()', -- if you need to install/update all binaries
   },
 
   { -- Autoformat
@@ -725,7 +802,6 @@ require('lazy').setup({
           ['<C-n>'] = cmp.mapping.select_next_item(),
           -- Select the [p]revious item
           ['<C-p>'] = cmp.mapping.select_prev_item(),
-
           -- Scroll the documentation window [b]ack / [f]orward
           ['<C-b>'] = cmp.mapping.scroll_docs(-4),
           ['<C-f>'] = cmp.mapping.scroll_docs(4),
@@ -745,7 +821,6 @@ require('lazy').setup({
           --  Generally you don't need this, because nvim-cmp will display
           --  completions whenever it has completion options available.
           ['<C-Space>'] = cmp.mapping.complete {},
-
           -- Think of <c-l> as moving to the right of your snippet expansion.
           --  So if you have a snippet that's like:
           --  function $name($args)
@@ -781,25 +856,47 @@ require('lazy').setup({
       }
     end,
   },
+  --{
+  --  'wincent/base16-nvim',
+  --  lazy = false, -- load at start
+  --  priority = 1000, -- load first
+  --  config = function()
+  --    vim.cmd [[colorscheme base16-gruvbox-dark-medium]]
+  --    vim.o.background = 'dark'
+  --    --  hi Normal ctermbg=NONE
+  --    -- Make comments more prominent -- they are important.
+  --    --local bools = vim.api.nvim_get_hl(0, { name = 'Boolean' })
+  --    --vim.api.nvim_set_hl(0, 'Comment', bools)
+  --    -- Make it clearly visible which argument we're at.
+  --    local marked = vim.api.nvim_get_hl(0, { name = 'PMenu' })
+  --    vim.api.nvim_set_hl(0, 'LspSignatureActiveParameter', { fg = marked.fg, bg = marked.bg, ctermfg = marked.ctermfg, ctermbg = marked.ctermbg, bold = true })
+  --    -- XXX
+  --    -- Would be nice to customize the highlighting of warnings and the like to make
+  --    -- them less glaring. But alas
+  --    -- https://github.com/nvim-lua/lsp_extensions.nvim/issues/21
+  --    -- call Base16hi("CocHintSign", g:base16_gui03, "", g:base16_cterm03, "", "", "")
+  --  end,
+  --},
+  {
+    'sainnhe/gruvbox-material',
+    enabled = true,
+    priority = 1000,
+    config = function()
+      vim.g.gruvbox_material_transparent_background = 0
+      vim.g.gruvbox_material_foreground = 'mix'
+      vim.g.gruvbox_material_background = 'hard' -- soft, medium, hard
+      vim.g.gruvbox_material_ui_contrast = 'high' -- The contrast of line numbers, indent lines, etc.
+      vim.g.gruvbox_material_float_style = 'bright' -- Background of floating windows
+      vim.g.gruvbox_material_statusline_style = 'material'
+      vim.g.gruvbox_material_cursor = 'auto'
 
-  { -- You can easily change to a different colorscheme.
-    -- Change the name of the colorscheme plugin below, and then
-    -- change the command in the config to whatever the name of that colorscheme is.
-    --
-    -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-    'folke/tokyonight.nvim',
-    priority = 1000, -- Make sure to load this before all the other start plugins.
-    init = function()
-      -- Load the colorscheme here.
-      -- Like many other themes, this one has different styles, and you could load
-      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
+      vim.g.gruvbox_material_colors_override = { bg0 = '#000000' } -- #0e1010
+      vim.g.gruvbox_material_colors_override = { bg0 = '#121212' }
+      vim.g.gruvbox_material_better_performance = 1
 
-      -- You can configure highlights by doing something like:
-      vim.cmd.hi 'Comment gui=none'
+      vim.cmd.colorscheme 'gruvbox-material'
     end,
   },
-
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
 
@@ -870,7 +967,31 @@ require('lazy').setup({
       --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
     end,
   },
-
+  {
+    'christoomey/vim-tmux-navigator',
+    cmd = {
+      'TmuxNavigateLeft',
+      'TmuxNavigateDown',
+      'TmuxNavigateUp',
+      'TmuxNavigateRight',
+      'TmuxNavigatePrevious',
+    },
+    keys = {
+      { '<c-h>', '<cmd><C-U>TmuxNavigateLeft<cr>' },
+      { '<c-j>', '<cmd><C-U>TmuxNavigateDown<cr>' },
+      { '<c-k>', '<cmd><C-U>TmuxNavigateUp<cr>' },
+      { '<c-l>', '<cmd><C-U>TmuxNavigateRight<cr>' },
+      { '<c-\\>', '<cmd><C-U>TmuxNavigatePrevious<cr>' },
+    },
+  },
+  {
+    'iamcco/markdown-preview.nvim',
+    cmd = { 'MarkdownPreviewToggle', 'MarkdownPreview', 'MarkdownPreviewStop' },
+    ft = { 'markdown' },
+    build = function()
+      vim.fn['mkdp#util#install']()
+    end,
+  },
   -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
   -- place them in the correct locations.
@@ -884,7 +1005,17 @@ require('lazy').setup({
   -- require 'kickstart.plugins.indent_line',
   -- require 'kickstart.plugins.lint',
   -- require 'kickstart.plugins.autopairs',
-  -- require 'kickstart.plugins.neo-tree',
+  require 'kickstart.plugins.neo-tree',
+
+  --require('kickstart.plugins.neo-tree').setup {
+  --  filesystem = {
+  --    filtered_items = {
+  --      visible = true,
+  --      hide_dotfiles = false,
+  --      hide_gitignored = false,
+  --    },
+  --  },
+  --},
   -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`

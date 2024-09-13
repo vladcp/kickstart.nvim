@@ -15,11 +15,35 @@ return {
   },
   opts = {
     filesystem = {
+      filtered_items = {
+        visible = true,
+        show_hidden_count = true,
+        hide_dotfiles = false,
+        hide_gitignored = false,
+      },
+      follow_current_file = {
+        enabled = true,
+        leave_dirs_open = false,
+      },
       window = {
         mappings = {
           ['\\'] = 'close_window',
         },
+        filtered_items = {
+          visible = true,
+          show_hidden_count = true,
+          hide_dotfiles = false,
+          hide_gitignored = false,
+          hide_by_name = {
+            -- '.git',
+            -- '.DS_Store',
+            -- 'thumbs.db',
+          },
+          never_show = {},
+        },
       },
     },
+    buffers = { follow_current_file = { enable = true } },
+    use_libuv_file_watcher = true,
   },
 }

@@ -372,9 +372,6 @@ require('lazy').setup({
           ['ui-select'] = {
             require('telescope.themes').get_dropdown(),
           },
-          ['csharpls_extended'] = {
-            require 'csharpls_extended',
-          },
         },
       }
 
@@ -488,7 +485,6 @@ require('lazy').setup({
 
       -- Allows extra capabilities provided by nvim-cmp
       'hrsh7th/cmp-nvim-lsp',
-
       'Decodetalkers/csharpls-extended-lsp.nvim',
     },
     config = function()
@@ -645,14 +641,14 @@ require('lazy').setup({
         --
         -- But for many setups, the LSP (`tsserver`) will work just fine
         --
+        ts_ls = {},
         bashls = {},
         csharp_ls = {
-          config = {
-            handlers = {
-              ['textDocument/definition'] = require('csharpls_extended').handler,
-              ['textDocument/typeDefinition'] = require('csharpls_extended').handler,
-            },
-            cmd = { 'csharpls' },
+          handlers = {
+            -- Use the working module name: csharpls_extended
+            -- Use the exposed handler function: handler (standard for this type of plugin)
+            ['textDocument/definition'] = require('csharpls_extended').handler,
+            ['textDocument/typeDefinition'] = require('csharpls_extended').handler,
           },
         },
         lua_ls = {
